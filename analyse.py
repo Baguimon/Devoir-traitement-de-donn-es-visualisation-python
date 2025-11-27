@@ -25,3 +25,32 @@ os.makedirs(FIG_DIR, exist_ok=True)
 pd.set_option("display.max_columns", None)
 
 
+# -------------------------------------------------------------------
+# 1. Importation & EDA
+# -------------------------------------------------------------------
+
+print("=== 1. IMPORT & EDA ===")
+
+df = pd.read_csv(DATA_PATH, sep=";")
+
+print("\nAperçu des premières lignes :")
+print(df.head())
+
+print("\nTypes de colonnes initiaux :")
+print(df.dtypes)
+
+print("\nRésumé statistique (incluant les objets) :")
+print(df.describe(include="all"))
+
+mem_before = df.memory_usage(deep=True).sum()
+print(f"\nMémoire utilisée AVANT optimisation : {mem_before/1024:.2f} Ko")
+
+print("\nQualité initiale : valeurs manquantes & extrêmes")
+print(df.isna().sum())
+
+for col in ["gaming_interest_score",
+            "insta_design_interest_score",
+            "football_interest_score"]:
+    print(f"{col} -> min={df[col].min()} / max={df[col].max()}")
+
+
