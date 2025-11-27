@@ -358,3 +358,27 @@ plt.close()
 
 print("Toutes les figures ont été enregistrées dans le dossier 'figures/'.")
 
+# -------------------------------------------------------------------
+# 7. Extraction de stats pour le data telling
+# -------------------------------------------------------------------
+
+print("\n=== 7. EXTRACTION POUR LE DATA TELLING ===")
+
+
+mask_target = (df_opt["age_group"] == "25-34") & (df_opt["gaming_segment"] == "fort")
+target_segment = df_opt.loc[mask_target]
+
+print(f"Effectif du segment cible (25-34 ans, gaming fort) : {len(target_segment)}")
+print(
+    "Taux de réussite dans ce segment : "
+    f"{target_segment['campaign_success_bool'].mean():.2%}"
+)
+
+print("\nRépartition des produits recommandés dans ce segment :")
+print(target_segment["recommended_product"].value_counts())
+
+print("\nRépartition des supports recommandés dans ce segment :")
+print(target_segment["canal_recommande"].value_counts())
+
+print("\nScript terminé.")
+
