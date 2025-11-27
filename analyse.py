@@ -53,4 +53,68 @@ for col in ["gaming_interest_score",
             "football_interest_score"]:
     print(f"{col} -> min={df[col].min()} / max={df[col].max()}")
 
+# -------------------------------------------------------------------
+# 2. Nettoyage & mise en forme
+# -------------------------------------------------------------------
+
+print("\n=== 2. NETTOYAGE & MISE EN FORME ===")
+
+df_clean = df.copy()
+
+
+df_clean["campaign_success"] = df_clean["campaign_success"].astype(str).str.strip()
+
+df_clean["campaign_success_bool"] = df_clean["campaign_success"].map(
+    {"True": 1, "False": 0}
+)
+
+
+df_clean["recommended_product"] = df_clean["recommended_product"].astype("string")
+df_clean["recommended_product"] = df_clean["recommended_product"].replace(
+    {
+        "Fornite": "Fortnite",   
+        "Test": pd.NA         
+    }
+)
+
+
+df_clean["canal_recommande"] = (
+    df_clean["canal_recommande"]
+    .astype("string")
+    .str.lower()
+    .str.strip()
+)
+
+
+df_clean["canal_recommande"] = df_clean["canal_recommande"].replace(
+    {
+        "mail": "mail",
+        "insta": "insta",
+        "facebook": "facebook"
+    }
+
+)
+
+
+print("\nValeurs manquantes AVANT traitement :")
+print(df_clean.isna().sum())
+
+
+df_clean = df_clean.dropna(
+    subset=["football_interest_score", "recommended_product", "age"]
+)
+
+print("\nValeurs manquantes APRÈS suppression des lignes incomplètes :")
+print(df_clean.isna().sum())
+
+
+df_clean["Id"] = df_clean["Id"].astype("int32")
+for col in [
+    "gaming_interest_score",
+    "insta_design_interest_score",
+    "football_interest_score",
+]:
+    df_clean[col] = df_clean[col].astype("float32")
+
+df_clean["age"] = df_clean["age"].astype("float32")
 
