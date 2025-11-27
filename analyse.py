@@ -178,13 +178,13 @@ for col in [
 
 print("\n=== 4. OPTIMISATION MÉMOIRE ===")
 
-# On crée une version optimisée
+
 df_opt = df_no_anom.copy()
 
-# Age : de 2 à 60 environ -> int8 suffit
+
 df_opt["age"] = df_opt["age"].astype("int8")
 
-# Colonnes catégorielles
+
 for col in [
     "recommended_product",
     "canal_recommande",
@@ -192,7 +192,7 @@ for col in [
 ]:
     df_opt[col] = df_opt[col].astype("category")
 
-# Ajout de segments (age_group, gaming_segment) -> catégories
+
 bins_age = [0, 12, 17, 24, 34, 44, 60, 120]
 labels_age = ["0-12", "13-17", "18-24", "25-34", "35-44", "45-60", "60+"]
 df_opt["age_group"] = pd.cut(
@@ -215,4 +215,50 @@ df_opt["gaming_segment"] = df_opt["gaming_segment"].astype("category")
 mem_after = df_opt.memory_usage(deep=True).sum()
 print(f"Mémoire utilisée APRÈS optimisation : {mem_after/1024:.2f} Ko")
 print(f"Ratio mémoire après/avant : {mem_after/mem_before:.2%}")
+
+# -------------------------------------------------------------------
+# 5. KPIs & analyses statistiques
+# -------------------------------------------------------------------
+
+print("\n=== 5. ANALYSE STATISTIQUE & KPI ===")
+
+def success_rate(group: pd.DataFrame) -> float:
+    return group["campaign_success_bool"].mean()
+
+
+global_sr = success_rate(df_opt)
+print(f"Taux de réussite global de la campagne : {global_sr:.2%}")
+
+
+sr_by_product = df_opt.groupby("recommended_product").apply(success_rate).sort_values(ascending=False)
+print("\nTaux de réussite par produit :")
+print((sr_by_product * 100).round(2).astype(str) + " %")
+
+
+sr_by_channel = df_opt.groupby("canal_recommande").apply(success_rate).sort_values(ascending=False)
+print("\nTaux de réussite par support :")
+print((sr_by_channel * 100).round(2).astype(str) + " %")
+
+
+sr_by_age_group = df_opt.groupby("age_group").apply(success_rate)
+print("\nTaux de réussite par tranche d’âge :")
+print((sr_by_age_group * 100).round(2).astype(str) + " %")
+
+sr_by_gaming_seg = df_opt.groupby("gaming_segment").apply(success_rate)
+print("\nTaux de réussite par segment gaming :")
+print((sr_by_gaming_seg * 100).round(2).astype(str) + " %")
+
+w
+corr = df_opt[
+    [
+        "gaming_interest_score",
+        "insta_design_interest_score",
+        "football_interest_score",
+        "age",
+        "campaign_success_bool",
+    ]
+].corr()
+
+print("\nMatrice de corrélation :")
+print(corr)
 
