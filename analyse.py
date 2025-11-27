@@ -262,3 +262,99 @@ corr = df_opt[
 print("\nMatrice de corrélation :")
 print(corr)
 
+# -------------------------------------------------------------------
+# 5. KPIs & analyses statistiques
+# -------------------------------------------------------------------
+
+print("\n=== 5. ANALYSE STATISTIQUE & KPI ===")
+
+def success_rate(group: pd.DataFrame) -> float:
+    return group["campaign_success_bool"].mean()
+
+# 5.1 Taux de réussite global
+global_sr = success_rate(df_opt)
+print(f"Taux de réussite global de la campagne : {global_sr:.2%}")
+
+# 5.2 Taux de réussite par produit recommandé
+sr_by_product = df_opt.groupby("recommended_product").apply(success_rate).sort_values(ascending=False)
+print("\nTaux de réussite par produit :")
+print((sr_by_product * 100).round(2).astype(str) + " %")
+
+# 5.3 Taux de réussite par support (canal_recommande)
+sr_by_channel = df_opt.groupby("canal_recommande").apply(success_rate).sort_values(ascending=False)
+print("\nTaux de réussite par support :")
+print((sr_by_channel * 100).round(2).astype(str) + " %")
+
+# 5.4 Taux de réussite par tranche d’âge
+sr_by_age_group = df_opt.groupby("age_group").apply(success_rate)
+print("\nTaux de réussite par tranche d’âge :")
+print((sr_by_age_group * 100).round(2).astype(str) + " %")
+
+# 5.5 Taux de réussite par segment de gaming
+sr_by_gaming_seg = df_opt.groupby("gaming_segment").apply(success_rate)
+print("\nTaux de réussite par segment gaming :")
+print((sr_by_gaming_seg * 100).round(2).astype(str) + " %")
+
+# 5.6 Matrice de corrélation
+corr = df_opt[
+    [
+        "gaming_interest_score",
+        "insta_design_interest_score",
+        "football_interest_score",
+        "age",
+        "campaign_success_bool",
+    ]
+].corr()
+
+print("\nMatrice de corrélation :")
+print(corr)
+
+# -------------------------------------------------------------------
+# 6. Visualisations des KPI (matplotlib)
+# -------------------------------------------------------------------
+
+print("\n=== 6. VISUALISATIONS (figures/) ===")
+
+plt.figure()
+df_opt[["gaming_interest_score", "insta_design_interest_score", "football_interest_score"]].hist()
+plt.tight_layout()
+plt.savefig(os.path.join(FIG_DIR, "distrib_scores.png"))
+plt.close()
+
+plt.figure()
+sr_by_product.plot(kind="bar")
+plt.ylabel("Taux de réussite")
+plt.title("Taux de réussite par produit recommandé")
+plt.tight_layout()
+plt.savefig(os.path.join(FIG_DIR, "kpi_success_by_product.png"))
+plt.close()
+
+plt.figure()
+sr_by_channel.plot(kind="bar")
+plt.ylabel("Taux de réussite")
+plt.title("Taux de réussite par support")
+plt.tight_layout()
+plt.savefig(os.path.join(FIG_DIR, "kpi_success_by_channel.png"))
+plt.close()
+
+
+plt.figure()
+sr_by_age_group.plot(kind="bar")
+plt.ylabel("Taux de réussite")
+plt.title("Taux de réussite par tranche d’âge")
+plt.tight_layout()
+plt.savefig(os.path.join(FIG_DIR, "kpi_success_by_age_group.png"))
+plt.close()
+
+plt.figure()
+plt.imshow(corr, interpolation="nearest")
+plt.xticks(range(len(corr.columns)), corr.columns, rotation=45, ha="right")
+plt.yticks(range(len(corr.columns)), corr.columns)
+plt.colorbar()
+plt.title("Matrice de corrélation")
+plt.tight_layout()
+plt.savefig(os.path.join(FIG_DIR, "corr_matrix.png"))
+plt.close()
+
+print("Toutes les figures ont été enregistrées dans le dossier 'figures/'.")
+
