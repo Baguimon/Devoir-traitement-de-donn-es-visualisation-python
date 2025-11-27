@@ -172,3 +172,47 @@ for col in [
     print(f"{col} après nettoyage -> min={df_no_anom[col].min()} / max={df_no_anom[col].max()}")
 
 
+# -------------------------------------------------------------------
+# 4. Optimisation mémoire finale
+# -------------------------------------------------------------------
+
+print("\n=== 4. OPTIMISATION MÉMOIRE ===")
+
+# On crée une version optimisée
+df_opt = df_no_anom.copy()
+
+# Age : de 2 à 60 environ -> int8 suffit
+df_opt["age"] = df_opt["age"].astype("int8")
+
+# Colonnes catégorielles
+for col in [
+    "recommended_product",
+    "canal_recommande",
+    "campaign_success",
+]:
+    df_opt[col] = df_opt[col].astype("category")
+
+# Ajout de segments (age_group, gaming_segment) -> catégories
+bins_age = [0, 12, 17, 24, 34, 44, 60, 120]
+labels_age = ["0-12", "13-17", "18-24", "25-34", "35-44", "45-60", "60+"]
+df_opt["age_group"] = pd.cut(
+    df_opt["age"], bins=bins_age, labels=labels_age, right=True, include_lowest=True
+)
+
+bins_gaming = [-0.01, 30, 70, 100]
+labels_gaming = ["faible", "moyen", "fort"]
+df_opt["gaming_segment"] = pd.cut(
+    df_opt["gaming_interest_score"],
+    bins=bins_gaming,
+    labels=labels_gaming,
+    right=True,
+    include_lowest=True,
+)
+
+df_opt["age_group"] = df_opt["age_group"].astype("category")
+df_opt["gaming_segment"] = df_opt["gaming_segment"].astype("category")
+
+mem_after = df_opt.memory_usage(deep=True).sum()
+print(f"Mémoire utilisée APRÈS optimisation : {mem_after/1024:.2f} Ko")
+print(f"Ratio mémoire après/avant : {mem_after/mem_before:.2%}")
+
