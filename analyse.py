@@ -118,3 +118,57 @@ for col in [
 
 df_clean["age"] = df_clean["age"].astype("float32")
 
+# -------------------------------------------------------------------
+# 3. Détection d’anomalies
+# -------------------------------------------------------------------
+
+print("\n=== 3. DÉTECTION D’ANOMALIES ===")
+
+for col in [
+    "gaming_interest_score",
+    "insta_design_interest_score",
+    "football_interest_score",
+]:
+
+    df_clean[col + "_is_anomaly"] = (
+        (df_clean[col] < 0) | (df_clean[col] > 100)
+    )
+
+    nb_anom = df_clean[col + "_is_anomaly"].sum()
+    print(f"{col}: {nb_anom} anomalies hors [0, 100] détectées.")
+
+
+    plt.figure()
+    x = range(len(df_clean))
+    colors = np.where(df_clean[col + "_is_anomaly"], "red", "blue")
+    plt.scatter(x, df_clean[col], c=colors)
+    plt.axhline(0, linestyle="--")
+    plt.axhline(100, linestyle="--")
+    plt.title(f"Anomalies sur {col} (rouge = anomalie)")
+    plt.xlabel("Index")
+    plt.ylabel(col)
+    plt.tight_layout()
+    plt.savefig(os.path.join(FIG_DIR, f"anomalies_{col}.png"))
+    plt.close()
+
+
+anomaly_cols = [
+    "gaming_interest_score_is_anomaly",
+    "insta_design_interest_score_is_anomaly",
+    "football_interest_score_is_anomaly",
+]
+mask_anomaly = df_clean[anomaly_cols].any(axis=1)
+print(f"\nNombre total de lignes avec au moins une anomalie : {mask_anomaly.sum()}")
+
+df_no_anom = df_clean.loc[~mask_anomaly].copy()
+print(f"Taille du dataset après suppression des anomalies : {df_no_anom.shape}")
+
+
+for col in [
+    "gaming_interest_score",
+    "insta_design_interest_score",
+    "football_interest_score",
+]:
+    print(f"{col} après nettoyage -> min={df_no_anom[col].min()} / max={df_no_anom[col].max()}")
+
+
