@@ -1,13 +1,6 @@
 """
 Projet N4 - Traitement et visualisation des données
-Analyse d’un jeu de données de phishing (scores d'intérêt, âge, produit recommandé, support, succès de campagne).
-
-Ce script couvre :
-1. Importation + EDA
-2. Nettoyage + optimisation mémoire
-3. Détection d’anomalies
-4. Calcul de KPI + visualisations (matplotlib uniquement)
-5. Préparation de statistiques utiles pour le data telling
+Mathis TRUONG - Timothé WINKLER
 """
 
 import os
