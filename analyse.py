@@ -15,9 +15,8 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
-# -------------------------------------------------------------------
+# --------------------------------
 # 0. Configuration de base
-# -------------------------------------------------------------------
 DATA_PATH = os.path.join("data", "result.csv")
 FIG_DIR = "figures"
 os.makedirs(FIG_DIR, exist_ok=True)
@@ -25,9 +24,8 @@ os.makedirs(FIG_DIR, exist_ok=True)
 pd.set_option("display.max_columns", None)
 
 
-# -------------------------------------------------------------------
+# ----------------------------
 # 1. Importation & EDA
-# -------------------------------------------------------------------
 
 print("=== 1. IMPORT & EDA ===")
 
@@ -53,21 +51,18 @@ for col in ["gaming_interest_score",
             "football_interest_score"]:
     print(f"{col} -> min={df[col].min()} / max={df[col].max()}")
 
-# -------------------------------------------------------------------
+# ----------------------------
 # 2. Nettoyage & mise en forme
-# -------------------------------------------------------------------
 
 print("\n=== 2. NETTOYAGE & MISE EN FORME ===")
 
 df_clean = df.copy()
-
 
 df_clean["campaign_success"] = df_clean["campaign_success"].astype(str).str.strip()
 
 df_clean["campaign_success_bool"] = df_clean["campaign_success"].map(
     {"True": 1, "False": 0}
 )
-
 
 df_clean["recommended_product"] = df_clean["recommended_product"].astype("string")
 df_clean["recommended_product"] = df_clean["recommended_product"].replace(
@@ -77,14 +72,12 @@ df_clean["recommended_product"] = df_clean["recommended_product"].replace(
     }
 )
 
-
 df_clean["canal_recommande"] = (
     df_clean["canal_recommande"]
     .astype("string")
     .str.lower()
     .str.strip()
 )
-
 
 df_clean["canal_recommande"] = df_clean["canal_recommande"].replace(
     {
@@ -95,10 +88,8 @@ df_clean["canal_recommande"] = df_clean["canal_recommande"].replace(
 
 )
 
-
 print("\nValeurs manquantes AVANT traitement :")
 print(df_clean.isna().sum())
-
 
 df_clean = df_clean.dropna(
     subset=["football_interest_score", "recommended_product", "age"]
@@ -106,7 +97,6 @@ df_clean = df_clean.dropna(
 
 print("\nValeurs manquantes APRÈS suppression des lignes incomplètes :")
 print(df_clean.isna().sum())
-
 
 df_clean["Id"] = df_clean["Id"].astype("int32")
 for col in [
@@ -118,9 +108,8 @@ for col in [
 
 df_clean["age"] = df_clean["age"].astype("float32")
 
-# -------------------------------------------------------------------
+# --------------------------
 # 3. Détection d’anomalies
-# -------------------------------------------------------------------
 
 print("\n=== 3. DÉTECTION D’ANOMALIES ===")
 
@@ -137,7 +126,6 @@ for col in [
     nb_anom = df_clean[col + "_is_anomaly"].sum()
     print(f"{col}: {nb_anom} anomalies hors [0, 100] détectées.")
 
-
     plt.figure()
     x = range(len(df_clean))
     colors = np.where(df_clean[col + "_is_anomaly"], "red", "blue")
@@ -151,7 +139,6 @@ for col in [
     plt.savefig(os.path.join(FIG_DIR, f"anomalies_{col}.png"))
     plt.close()
 
-
 anomaly_cols = [
     "gaming_interest_score_is_anomaly",
     "insta_design_interest_score_is_anomaly",
@@ -163,7 +150,6 @@ print(f"\nNombre total de lignes avec au moins une anomalie : {mask_anomaly.sum(
 df_no_anom = df_clean.loc[~mask_anomaly].copy()
 print(f"Taille du dataset après suppression des anomalies : {df_no_anom.shape}")
 
-
 for col in [
     "gaming_interest_score",
     "insta_design_interest_score",
@@ -172,18 +158,14 @@ for col in [
     print(f"{col} après nettoyage -> min={df_no_anom[col].min()} / max={df_no_anom[col].max()}")
 
 
-# -------------------------------------------------------------------
+# --------------------------
 # 4. Optimisation mémoire finale
-# -------------------------------------------------------------------
 
 print("\n=== 4. OPTIMISATION MÉMOIRE ===")
 
-
 df_opt = df_no_anom.copy()
 
-
 df_opt["age"] = df_opt["age"].astype("int8")
-
 
 for col in [
     "recommended_product",
@@ -191,7 +173,6 @@ for col in [
     "campaign_success",
 ]:
     df_opt[col] = df_opt[col].astype("category")
-
 
 bins_age = [0, 12, 17, 24, 34, 44, 60, 120]
 labels_age = ["0-12", "13-17", "18-24", "25-34", "35-44", "45-60", "60+"]
@@ -218,27 +199,22 @@ print(f"Ratio mémoire après/avant : {mem_after/mem_before:.2%}")
 
 # -------------------------------------------------------------------
 # 5. KPIs & analyses statistiques
-# -------------------------------------------------------------------
 
 print("\n=== 5. ANALYSE STATISTIQUE & KPI ===")
 
 def success_rate(group: pd.DataFrame) -> float:
     return group["campaign_success_bool"].mean()
 
-
 global_sr = success_rate(df_opt)
 print(f"Taux de réussite global de la campagne : {global_sr:.2%}")
-
 
 sr_by_product = df_opt.groupby("recommended_product").apply(success_rate).sort_values(ascending=False)
 print("\nTaux de réussite par produit :")
 print((sr_by_product * 100).round(2).astype(str) + " %")
 
-
 sr_by_channel = df_opt.groupby("canal_recommande").apply(success_rate).sort_values(ascending=False)
 print("\nTaux de réussite par support :")
 print((sr_by_channel * 100).round(2).astype(str) + " %")
-
 
 sr_by_age_group = df_opt.groupby("age_group").apply(success_rate)
 print("\nTaux de réussite par tranche d’âge :")
@@ -248,7 +224,6 @@ sr_by_gaming_seg = df_opt.groupby("gaming_segment").apply(success_rate)
 print("\nTaux de réussite par segment gaming :")
 print((sr_by_gaming_seg * 100).round(2).astype(str) + " %")
 
-w
 corr = df_opt[
     [
         "gaming_interest_score",
@@ -262,40 +237,33 @@ corr = df_opt[
 print("\nMatrice de corrélation :")
 print(corr)
 
-# -------------------------------------------------------------------
+# ----------------------------
 # 5. KPIs & analyses statistiques
-# -------------------------------------------------------------------
 
 print("\n=== 5. ANALYSE STATISTIQUE & KPI ===")
 
 def success_rate(group: pd.DataFrame) -> float:
     return group["campaign_success_bool"].mean()
 
-# 5.1 Taux de réussite global
 global_sr = success_rate(df_opt)
 print(f"Taux de réussite global de la campagne : {global_sr:.2%}")
 
-# 5.2 Taux de réussite par produit recommandé
 sr_by_product = df_opt.groupby("recommended_product").apply(success_rate).sort_values(ascending=False)
 print("\nTaux de réussite par produit :")
 print((sr_by_product * 100).round(2).astype(str) + " %")
 
-# 5.3 Taux de réussite par support (canal_recommande)
 sr_by_channel = df_opt.groupby("canal_recommande").apply(success_rate).sort_values(ascending=False)
 print("\nTaux de réussite par support :")
 print((sr_by_channel * 100).round(2).astype(str) + " %")
 
-# 5.4 Taux de réussite par tranche d’âge
 sr_by_age_group = df_opt.groupby("age_group").apply(success_rate)
 print("\nTaux de réussite par tranche d’âge :")
 print((sr_by_age_group * 100).round(2).astype(str) + " %")
 
-# 5.5 Taux de réussite par segment de gaming
 sr_by_gaming_seg = df_opt.groupby("gaming_segment").apply(success_rate)
 print("\nTaux de réussite par segment gaming :")
 print((sr_by_gaming_seg * 100).round(2).astype(str) + " %")
 
-# 5.6 Matrice de corrélation
 corr = df_opt[
     [
         "gaming_interest_score",
@@ -309,9 +277,8 @@ corr = df_opt[
 print("\nMatrice de corrélation :")
 print(corr)
 
-# -------------------------------------------------------------------
+# ---------------------------
 # 6. Visualisations des KPI (matplotlib)
-# -------------------------------------------------------------------
 
 print("\n=== 6. VISUALISATIONS (figures/) ===")
 
@@ -358,9 +325,8 @@ plt.close()
 
 print("Toutes les figures ont été enregistrées dans le dossier 'figures/'.")
 
-# -------------------------------------------------------------------
+# -------------------------
 # 7. Extraction de stats pour le data telling
-# -------------------------------------------------------------------
 
 print("\n=== 7. EXTRACTION POUR LE DATA TELLING ===")
 
